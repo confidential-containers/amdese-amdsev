@@ -19,18 +19,6 @@ build_kernel()
 	mkdir -p linux
 	pushd linux >/dev/null
 
-	if [ ! -d guest ]; then
-		run_cmd git clone ${KERNEL_GIT_URL} guest
-		pushd guest >/dev/null
-		run_cmd git remote add current ${KERNEL_GIT_URL}
-		popd
-	fi
-
-	if [ ! -d host ]; then
-		# use a copy of guest repo as the host repo
-		run_cmd cp -r guest host
-	fi
-
 	for V in guest host; do
 		# Check if only a "guest" or "host" or kernel build is requested
 		if [ "$kernel_type" != "" ]; then
@@ -47,10 +35,15 @@ build_kernel()
 			fi
 		else
 			BRANCH="${KERNEL_HOST_BRANCH}"
-			KERNEL_GIT_URL="${KERNEL_GUEST_GIT_URL:-${KERNEL_GIT_URL}}"
+			KERNEL_GIT_URL="${KERNEL_HOST_GIT_URL:-${KERNEL_GIT_URL}}"
 			if [ -n "$KERNEL_HOST_CONFIG_TEMPLATE" ]; then
 				kernel_config_path=${KERNEL_HOST_CONFIG_TEMPLATE}
 			fi
+		fi
+
+		if [ ! -d "${V}" ]; then
+			run_cmd git clone -b "${BRANCH}" --depth 1 "${KERNEL_GIT_URL}" "${V}"
+			run_cmd git -C "${V}" remote add current "${KERNEL_GIT_URL}"
 		fi
 
 		run_cmd echo "Using $kernel_config_path as template kernel configuration for $V."
@@ -83,8 +76,8 @@ build_kernel()
 		fi
 
 		pushd ${V} >/dev/null
-			run_cmd git fetch current
-			run_cmd git checkout current/${BRANCH}
+			run_cmd git fetch --depth 1 current "${BRANCH}"
+			run_cmd git checkout "current/${BRANCH}"
 			COMMIT=$(git log --format="%h" -1 HEAD)
 
 			run_cmd "cp $kernel_config_path .config"
