@@ -77,7 +77,7 @@ build_kernel()
 
 		pushd ${V} >/dev/null
 			run_cmd git fetch --depth 1 current "${BRANCH}"
-			run_cmd git checkout "current/${BRANCH}"
+			run_cmd git checkout "${BRANCH}"
 			COMMIT=$(git log --format="%h" -1 HEAD)
 
 			run_cmd "cp $kernel_config_path .config"
@@ -188,7 +188,7 @@ build_install_ovmf()
 
 	pushd ovmf >/dev/null
 		run_cmd git fetch current
-		run_cmd git checkout current/${OVMF_BRANCH}
+		run_cmd git checkout ${OVMF_BRANCH}
 		run_cmd git submodule update --init --recursive
 		run_cmd make -C BaseTools clean
 		run_cmd make -C BaseTools -j $(getconf _NPROCESSORS_ONLN)
@@ -228,7 +228,7 @@ build_install_qemu()
 
 	pushd qemu >/dev/null
 		run_cmd git fetch current
-		run_cmd git checkout current/${QEMU_BRANCH}
+		run_cmd git checkout ${QEMU_BRANCH}
 		run_cmd ./configure --target-list=x86_64-softmmu --prefix=$DEST
 		run_cmd $MAKE
 		run_cmd $MAKE install
