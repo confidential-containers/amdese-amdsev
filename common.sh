@@ -54,7 +54,7 @@ build_kernel()
 			# of date, so always update the remote URL first
 			run_cmd git remote set-url current "${KERNEL_GIT_URL}"
 			run_cmd git fetch --depth 1 current "${BRANCH}"
-			run_cmd git checkout "current/${BRANCH}"
+			run_cmd git checkout "${BRANCH}"
 			COMMIT=$(git log --format="%h" -1 HEAD)
 
 			run_cmd "cp /boot/config-$(uname -r) .config"
