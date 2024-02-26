@@ -3,13 +3,13 @@
 #
 
 # hypervisor commit
-KERNEL_GIT_URL="https://github.com/AMDESE/linux.git"
-KERNEL_HOST_BRANCH="snp-host-latest"
-KERNEL_GUEST_BRANCH="snp-guest-latest"
+KERNEL_GIT_URL="https://github.com/torvalds/linux.git"
+KERNEL_HOST_BRANCH="v6.12"
+KERNEL_GUEST_BRANCH="v6.12"
 
 # qemu commit
-QEMU_GIT_URL="https://github.com/AMDESE/qemu.git"
-QEMU_BRANCH="snp-latest"
+QEMU_GIT_URL="https://github.com/qemu/qemu.git"
+QEMU_BRANCH="v9.2.0"
 
 # guest bios
 #   An AP creation fix added after the 'edk2-stable202302' tag/release is
@@ -19,5 +19,5 @@ QEMU_BRANCH="snp-latest"
 #   please use the 'sev-snp-legacy' branch of this AMDSEV repo instead,
 #   which will build the latest known-working QEMU/OVMF trees for older
 #   SNP hypervisor/host kernels.
-OVMF_GIT_URL="https://github.com/AMDESE/ovmf.git"
-OVMF_BRANCH="snp-latest"
+OVMF_GIT_URL="https://github.com/tianocore/edk2.git"
+OVMF_BRANCH="edk2-stable202411"
