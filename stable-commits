@@ -3,13 +3,13 @@
 #
 
 # hypervisor commit
-KERNEL_GIT_URL="https://github.com/AMDESE/linux.git"
-KERNEL_HOST_BRANCH="sev-snp-iommu-avic_5.19-rc6_v4"
-KERNEL_GUEST_BRANCH="sev-snp-iommu-avic_5.19-rc6_v4"
+KERNEL_GIT_URL="https://github.com/confidential-containers/linux.git"
+KERNEL_HOST_BRANCH="amd-snp-202306070000"
+KERNEL_GUEST_BRANCH="amd-snp-202306070000"
 
 # qemu commit
-QEMU_GIT_URL="https://github.com/AMDESE/qemu.git"
-QEMU_BRANCH="snp-v3"
+QEMU_GIT_URL="https://github.com/confidential-containers/qemu.git"
+QEMU_BRANCH="amd-snp-202306070000"
 
 # guest bios
 #   This will use a stable tag that is known to work with the specified
@@ -17,5 +17,5 @@ QEMU_BRANCH="snp-v3"
 #   a hypervisor bug and breaks AP booting with the specified level of the
 #   hypervisor. Please report any failures with this level of UEFI/OVMF,
 #   so they can be addressed.
-OVMF_GIT_URL="https://github.com/tianocore/edk2.git"
-OVMF_BRANCH="edk2-stable202302"
+OVMF_GIT_URL="https://github.com/confidential-containers/edk2.git"
+OVMF_BRANCH="amd-snp-202306070000"
