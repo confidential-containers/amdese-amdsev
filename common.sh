@@ -175,6 +175,11 @@ build_install_ovmf()
 	pushd ovmf >/dev/null
 		run_cmd git fetch current
 		run_cmd git checkout ${OVMF_BRANCH}
+
+		# TODO: Remove this line after bumping to a newer release of OVMF.
+		# Reference: https://github.com/tianocore/edk2/pull/6402
+		sed -i -e "s|https://github.com/Zeex/subhook.git|https://github.com/tianocore/edk2-subhook.git|g" .gitmodules
+
 		run_cmd git submodule update --init --recursive
 		run_cmd make -C BaseTools
 		. ./edksetup.sh --reconfig
