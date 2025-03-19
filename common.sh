@@ -206,7 +206,8 @@ build_install_ovmf()
 		sed -i -e "s|https://github.com/Zeex/subhook.git|https://github.com/tianocore/edk2-subhook.git|g" .gitmodules
 
 		run_cmd git submodule update --init --recursive
-		run_cmd make -C BaseTools
+		run_cmd make -C BaseTools clean
+		run_cmd make -C BaseTools -j $(getconf _NPROCESSORS_ONLN)
 		. ./edksetup.sh --reconfig
 		touch OvmfPkg/AmdSev/Grub/grub.efi
 		run_cmd $BUILD_CMD
