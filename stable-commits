@@ -3,9 +3,9 @@
 #
 
 # hypervisor commit
-KERNEL_GIT_URL="https://github.com/torvalds/linux.git"
-KERNEL_HOST_BRANCH="v6.12"
-KERNEL_GUEST_BRANCH="v6.12"
+KERNEL_GIT_URL="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git"
+KERNEL_HOST_BRANCH="v6.16.1"
+KERNEL_GUEST_BRANCH="v6.16.1"
 
 # base/template kernel config (defaults to /boot/config-`uname -r`)
 #KERNEL_HOST_CONFIG_TEMPLATE=/path/to/kernel/config
