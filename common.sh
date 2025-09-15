@@ -35,7 +35,7 @@ build_kernel()
 			fi
 		else
 			BRANCH="${KERNEL_HOST_BRANCH}"
-			KERNEL_GIT_URL="${KERNEL_HOST_GIT_URL:-${KERNEL_GIT_URL}}"
+			KERNEL_GIT_URL="${KERNEL_GUEST_GIT_URL:-${KERNEL_GIT_URL}}"
 			if [ -n "$KERNEL_HOST_CONFIG_TEMPLATE" ]; then
 				kernel_config_path=${KERNEL_HOST_CONFIG_TEMPLATE}
 			fi

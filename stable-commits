@@ -3,9 +3,9 @@
 #
 
 # hypervisor commit
-KERNEL_GIT_URL="https://github.com/torvalds/linux.git"
-KERNEL_HOST_BRANCH="v6.12"
-KERNEL_GUEST_BRANCH="v6.12"
+KERNEL_GIT_URL="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git"
+KERNEL_HOST_BRANCH="v6.16.1"
+KERNEL_GUEST_BRANCH="v6.16.1"
 
 # base/template kernel config (defaults to /boot/config-`uname -r`)
 #KERNEL_HOST_CONFIG_TEMPLATE=/path/to/kernel/config
@@ -13,8 +13,8 @@ KERNEL_GUEST_BRANCH="v6.12"
 
 # qemu commit
 QEMU_GIT_URL="https://github.com/qemu/qemu.git"
-QEMU_BRANCH="v9.2.0"
+QEMU_BRANCH="v10.1.2"
 
-# guest bios (snp-latest branch currently points to "edk2-stable202502")
+# guest bios (snp-latest branch currently points to "edk2-stable202508")
 OVMF_GIT_URL="https://github.com/tianocore/edk2.git"
-OVMF_BRANCH="edk2-stable202411"
+OVMF_BRANCH="edk2-stable202508"
