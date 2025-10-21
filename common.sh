@@ -14,9 +14,22 @@ build_kernel()
 {
 	set -x
 	kernel_type=$1
+	kernel_config_path="/boot/config-$(uname -r)"
 	shift
 	mkdir -p linux
 	pushd linux >/dev/null
+
+	if [ ! -d guest ]; then
+		run_cmd git clone ${KERNEL_GIT_URL} guest
+		pushd guest >/dev/null
+		run_cmd git remote add current ${KERNEL_GIT_URL}
+		popd
+	fi
+
+	if [ ! -d host ]; then
+		# use a copy of guest repo as the host repo
+		run_cmd cp -r guest host
+	fi
 
 	for V in guest host; do
 		# Check if only a "guest" or "host" or kernel build is requested
@@ -28,16 +41,18 @@ build_kernel()
 
 		if [ "${V}" = "guest" ]; then
 			BRANCH="${KERNEL_GUEST_BRANCH}"
-			KERNEL_GIT_URL="${KERNEL_GUEST_GIT_URL:-${KERNEL_GIT_URL}}"
+			kernel_config_path=${KERNEL_GUEST_CONFIG_TEMPLATE}
+			if [ -n "$KERNEL_GUEST_CONFIG_TEMPLATE" ]; then
+				kernel_config_path=${KERNEL_GUEST_CONFIG_TEMPLATE}
+			fi
 		else
 			BRANCH="${KERNEL_HOST_BRANCH}"
-			KERNEL_GIT_URL="${KERNEL_HOST_GIT_URL:-${KERNEL_GIT_URL}}"
+			if [ -n "$KERNEL_HOST_CONFIG_TEMPLATE" ]; then
+				kernel_config_path=${KERNEL_HOST_CONFIG_TEMPLATE}
+			fi
 		fi
 
-		if [ ! -d "${V}" ]; then
-			run_cmd git clone -b "${BRANCH}" --depth 1 "${KERNEL_GIT_URL}" "${V}"
-			run_cmd git -C "${V}" remote add current "${KERNEL_GIT_URL}"
-		fi
+		run_cmd echo "Using $kernel_config_path as template kernel configuration for $V."
 
 		# If ${KERNEL_GIT_URL} is ever changed, 'current' remote will be out
 		# of date, so always update the remote URL first. Also handle case
@@ -59,14 +74,19 @@ build_kernel()
 
 		MAKE="make -C ${V} -j $(getconf _NPROCESSORS_ONLN) LOCALVERSION="
 
-		run_cmd $MAKE distclean
+		# dirty directories might cause checkout to fail, but first time checkout
+		# won't have a Makefile in the first place to allow for failures in that
+		# case
+		if [ -f ${V}/Makefile ]; then
+			run_cmd $MAKE distclean
+		fi
 
 		pushd ${V} >/dev/null
 			run_cmd git fetch --depth 1 current "${BRANCH}"
 			run_cmd git checkout "${BRANCH}"
 			COMMIT=$(git log --format="%h" -1 HEAD)
 
-			run_cmd "cp /boot/config-$(uname -r) .config"
+			run_cmd "cp $kernel_config_path .config"
 			run_cmd ./scripts/config --set-str LOCALVERSION "$VER-$COMMIT"
 			run_cmd ./scripts/config --disable LOCALVERSION_AUTO
 			run_cmd ./scripts/config --enable  EXPERT
@@ -175,8 +195,14 @@ build_install_ovmf()
 	pushd ovmf >/dev/null
 		run_cmd git fetch current
 		run_cmd git checkout ${OVMF_BRANCH}
+
+		# TODO: Remove this line after bumping to a newer release of OVMF.
+		# Reference: https://github.com/tianocore/edk2/pull/6402
+		sed -i -e "s|https://github.com/Zeex/subhook.git|https://github.com/tianocore/edk2-subhook.git|g" .gitmodules
+
 		run_cmd git submodule update --init --recursive
-		run_cmd make -C BaseTools
+		run_cmd make -C BaseTools clean
+		run_cmd make -C BaseTools -j $(getconf _NPROCESSORS_ONLN)
 		. ./edksetup.sh --reconfig
 		touch OvmfPkg/AmdSev/Grub/grub.efi
 		run_cmd $BUILD_CMD

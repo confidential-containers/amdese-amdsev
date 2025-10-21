@@ -20,6 +20,7 @@ SEV=
 SEV_ES=
 SEV_SNP=
 ALLOW_DEBUG=
+DRY=
 
 EXEC_PATH="./usr/local"
 UEFI_PATH="$EXEC_PATH/share/qemu"
@@ -45,7 +46,7 @@ usage() {
 	echo "                    (Requires that QEMU is built on a host that supports libslirp-dev 4.7 or newer)"
 	echo " -monitor PATH      Path to QEMU monitor socket (default: $MONITOR_PATH)"
 	echo " -log PATH          Path to QEMU console log (default: $QEMU_CONSOLE_LOG)"
-	echo " -certs PATH        Path to SNP certificate blob for guest (default: none)"
+	echo " -dry               Print generated command-line but don't launch the guest"
 	exit 1
 }
 
@@ -143,7 +144,7 @@ while [ -n "$1" ]; do
 		-log)           QEMU_CONSOLE_LOG="$2"
 				shift
 				;;
-		-certs) CERTS_PATH="$2"
+		-dry)   DRY="1"
 				shift
 				;;
 		*) 		usage
@@ -224,7 +225,7 @@ rm -rf $QEMU_CMDLINE
 add_opts "$QEMU_EXE"
 
 # Basic virtual machine property
-add_opts "-enable-kvm -cpu ${CPU_MODEL} -machine q35"
+add_opts "-enable-kvm -cpu ${CPU_MODEL},+la57,phys-bits=52 -machine q35"
 
 # add number of VCPUs
 [ -n "${SMP}" ] && add_opts "-smp ${SMP},maxcpus=255"
@@ -279,7 +280,7 @@ fi
 
 # If this is SEV guest then add the encryption device objects to enable support
 if [ -n "${SEV}" ]; then
-	add_opts "-machine memory-encryption=sev0,vmport=off" 
+	add_opts "-machine confidential-guest-support=sev0,vmport=off"
 	get_cbitpos
 
 	if [ -n "${SEV_SNP}" ]; then
@@ -290,11 +291,7 @@ if [ -n "${SEV}" ]; then
 
 		add_opts "-object memory-backend-memfd,id=ram1,size=${MEM}M,share=true,prealloc=false"
 		add_opts "-machine memory-backend=ram1"
-		if [ "${CERTS_PATH}" != "" ]; then
-			add_opts "-object sev-snp-guest,id=sev0,policy=${POLICY},cbitpos=${CBITPOS},reduced-phys-bits=1,certs-path=${CERTS_PATH}"
-		else
-			add_opts "-object sev-snp-guest,id=sev0,policy=${POLICY},cbitpos=${CBITPOS},reduced-phys-bits=1"
-		fi
+		add_opts "-object sev-snp-guest,id=sev0,policy=${POLICY},cbitpos=${CBITPOS},reduced-phys-bits=1"
 	else
 		POLICY=$((0x01))
 		[ -n "${SEV_ES}" ] && POLICY=$((POLICY | 0x04))
@@ -341,7 +338,9 @@ stty intr ^]
 echo "Launching VM ..."
 echo "  $QEMU_CMDLINE"
 sleep 1
-bash ${QEMU_CMDLINE} 2>&1 | tee -a ${QEMU_CONSOLE_LOG}
+if [ -z $DRY ]; then
+	bash ${QEMU_CMDLINE} 2>&1 | tee -a ${QEMU_CONSOLE_LOG}
+fi
 
 # restore the mapping
 stty intr ^c

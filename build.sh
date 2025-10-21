@@ -57,6 +57,10 @@ if [ -z "$1" ]; then
 	build_install_qemu "$INSTALL_DIR"
 	build_install_ovmf "$INSTALL_DIR/share/qemu"
 	build_kernel $2
+	if [ $? -ne 0 ]; then
+		echo "build failed: $?"
+		exit 1
+	fi
 else
 	case "$1" in
 	qemu)
@@ -86,7 +90,8 @@ if [[ "$BUILD_PACKAGE" = "1" ]]; then
 		cp linux/linux-*-guest-*.deb $OUTPUT_DIR/linux/guest -v
 		cp linux/linux-*-host-*.deb $OUTPUT_DIR/linux/host -v
 	else
-		cp linux/kernel-*.rpm $OUTPUT_DIR/linux -v
+		cp linux/kernel-*host*.rpm $OUTPUT_DIR/linux/host -v
+		cp linux/kernel-*guest*.rpm $OUTPUT_DIR/linux/guest -v
 	fi
 
 	cp launch-qemu.sh ${OUTPUT_DIR} -v
